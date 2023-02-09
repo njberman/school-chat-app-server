@@ -153,6 +153,7 @@ async function main() {
         connected.push({
           username: message.split(' ')[1],
         });
+        socket.username = username;
       }
       ws.clients.forEach((s) => {
         if (s.readyState === OPEN) {
@@ -164,6 +165,7 @@ async function main() {
       ws.clients.forEach((s) => {
         if (s.readyState === OPEN) {
           s.send(`connected ${ws.clients.size}`);
+          connected.splice(connected.indexOf({username:socket.username}), 1);
         }
       })
     );

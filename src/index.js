@@ -1,18 +1,18 @@
-const express = require("express");
-const WebSocket = require("ws");
-const morgan = require("morgan");
-const helmet = require("helmet");
-const cors = require("cors");
-const http = require("http");
+const express = require('express');
+const WebSocket = require('ws');
+const morgan = require('morgan');
+const helmet = require('helmet');
+const cors = require('cors');
+const http = require('http');
 
-const { MongoClient } = require("mongodb");
-const { OPEN } = require("ws");
+const { MongoClient } = require('mongodb');
+const { OPEN } = require('ws');
 
-require("dotenv").config();
+require('dotenv').config();
 
 const app = express();
 
-app.use(morgan("dev"));
+app.use(morgan('dev'));
 app.use(helmet());
 app.use(cors());
 app.use(express.json());
@@ -24,16 +24,16 @@ const client = new MongoClient(URI);
 
 async function main() {
   await client.connect();
-  console.log("Successfully connected to Database");
-  const db = client.db("chat");
-  const chats = db.collection("chats");
-  const accounts = db.collection("accounts");
+  console.log('Successfully connected to Database');
+  const db = client.db('chat');
+  const chats = db.collection('chats');
+  const accounts = db.collection('accounts');
 
   const connected = [];
 
-  app.get("/", (req, res) => res.json({ message: "connected" }));
+  app.get('/', (req, res) => res.json({ message: 'connected' }));
 
-  app.post("/signup", async (req, res) => {
+  app.post('/signup', async (req, res) => {
     const { username, password } = req.body;
     if (username && password) {
       // Create accountaccounts
@@ -41,7 +41,7 @@ async function main() {
         if (acc.username === username) {
           return res
             .json({
-              error: "Username already exists",
+              error: 'Username already exists',
             })
             .status(400);
         }
@@ -60,13 +60,13 @@ async function main() {
     } else {
       return res
         .json({
-          error: "Username or password not supplied",
+          error: 'Username or password not supplied',
         })
         .status(400);
     }
   });
 
-  app.delete("/removeaccount", async (req, res) => {
+  app.delete('/removeaccount', async (req, res) => {
     const { username, password } = req.body;
     if (username && password) {
       for (let acc of await accounts.find({}).toArray()) {
@@ -81,19 +81,19 @@ async function main() {
       }
       return res
         .json({
-          error: "Account not found in database",
+          error: 'Account not found in database',
         })
         .status(400);
     } else {
       return res
         .json({
-          error: "Username or password not supplied",
+          error: 'Username or password not supplied',
         })
         .status(400);
     }
   });
 
-  app.post("/login", async (req, res) => {
+  app.post('/login', async (req, res) => {
     const { username, password } = req.body;
     if (username && password) {
       for (let acc of await accounts.find({}).toArray()) {
@@ -103,7 +103,7 @@ async function main() {
               return res
                 .json({
                   message: `Login unsuccessful to account ${username}`,
-                  error: "Someone already connected",
+                  error: 'Someone already connected',
                   username,
                   successful: false,
                 })
@@ -129,7 +129,7 @@ async function main() {
     } else {
       return res
         .json({
-          error: "Username or password not supplied",
+          error: 'Username or password not supplied',
         })
         .status(400);
     }
@@ -139,19 +139,19 @@ async function main() {
 
   const ws = new WebSocket.Server({ server });
 
-  ws.on("connection", (socket) => {
-    console.log("New connection!");
+  ws.on('connection', (socket) => {
+    console.log('New connection!');
     ws.clients.forEach((s) => {
       if (s.readyState === OPEN) {
         s.send(`connected ${ws.clients.size}`);
       }
     });
-    socket.on("message", (m) => {
+    socket.on('message', (m) => {
       const message = String(m);
       console.log(`Received: ${message}`);
-      if (message.includes("connect")) {
+      if (message.includes('connect')) {
         connected.push({
-          username: message.split(" ")[1],
+          username: message.split(' ')[1],
         });
       }
       ws.clients.forEach((s) => {
@@ -160,7 +160,7 @@ async function main() {
         }
       });
     });
-    socket.on("close", () =>
+    socket.on('close', () =>
       ws.clients.forEach((s) => {
         if (s.readyState === OPEN) {
           s.send(`connected ${ws.clients.size}`);
